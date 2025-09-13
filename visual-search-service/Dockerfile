@@ -11,12 +11,19 @@ RUN apt-get update && apt-get install -y \
     libwebp-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Create cache directory with proper permissions
+RUN mkdir -p /.cache && chmod 777 /.cache
+
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .
+
+# Create a non-root user for security
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app /.cache
+USER appuser
 
 # Expose port
 EXPOSE 7860
