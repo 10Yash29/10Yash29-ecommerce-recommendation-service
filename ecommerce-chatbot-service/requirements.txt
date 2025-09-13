@@ -1,0 +1,27 @@
+# === Web & Core ===
+Flask==3.1.0
+flask-cors==5.0.1
+python-dotenv==1.1.0
+requests==2.32.3
+
+# === Sentence Embeddings ===
+sentence-transformers==2.2.2
+huggingface-hub==0.14.1
+numpy==1.24.4
+
+# === Vector Search ===
+faiss-cpu==1.7.4
+
+# === Transformers ===
+transformers==4.28.1
+tokenizers==0.13.3
+accelerate==0.29.3
+torch==2.0.1             # <-- removed +cpu
+torchvision==0.15.2      # optional if used in your app
+scipy>=1.10.0
+
+# === Markdown
+markdown==3.4.1
+
+# === Logging (optional)
+tqdm==4.66.4
