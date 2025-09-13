@@ -1,10 +1,14 @@
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies for image processing and PostgreSQL
 RUN apt-get update && apt-get install -y \
     gcc \
+    libpq-dev \
+    libjpeg-dev \
+    libpng-dev \
+    libwebp-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
