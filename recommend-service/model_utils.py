@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 class ModelUtils:
     def __init__(self, df, user_to_idx, idx_to_user, product_to_idx, idx_to_product):
+        self.df = df
         self.user_to_idx = user_to_idx
         self.idx_to_user = idx_to_user
         self.product_to_idx = product_to_idx
@@ -98,12 +99,20 @@ class ModelUtils:
             return list(self.product_to_idx.keys())[:min(n, len(self.product_to_idx))]
     
     def get_user_interactions(self, user_idx):
-        """Get user's interaction vector"""
-        if user_idx < self.user_item_matrix.shape[0]:
-            return self.user_item_matrix[user_idx]
-        else:
-            return csr_matrix((1, self.user_item_matrix.shape[1]))
+        """Get user interactions as sparse matrix"""
+        user_id = self.idx_to_user[user_idx]
+        user_data = self.df[self.df['userId'] == user_id]
+        
+        if user_data.empty:
+            return csr_matrix((1, len(self.product_to_idx)))
+            
+        cols = [self.product_to_idx[pid] for pid in user_data['productId']]
+        data = user_data['strength'].values
+        rows = [0] * len(cols)
+        
+        return csr_matrix((data, (rows, cols)), shape=(1, len(self.product_to_idx)))
     
     def get_cold_start_recommendations(self, n=5):
-        """Get recommendations for new users (cold start)"""
-        return self.popular_products[:n]
+        """Get popular products for new users"""
+        popular_products = self.df.groupby('productId')['strength'].sum().nlargest(n)
+        return popular_products.index.tolist()

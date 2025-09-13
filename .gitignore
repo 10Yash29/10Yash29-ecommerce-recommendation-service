@@ -29,6 +29,10 @@ data/
 logs/
 *.log
 
+# Allow specific model files
+!recommend-service/trained_model.pkl
+!recommend-service/aggregated_interactions.csv
+
 # IDE
 .vscode/
 .idea/

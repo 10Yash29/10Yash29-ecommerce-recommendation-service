@@ -5,7 +5,6 @@ import psycopg2
 import requests
 from io import BytesIO
 from PIL import Image
-import pillow_avif
 import numpy as np
 import pickle
 import torch
