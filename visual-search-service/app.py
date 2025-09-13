@@ -228,6 +228,66 @@ def visual_search_url():
         logger.error(f"URL search error: {e}")
         return jsonify({"error": "Search failed"}), 500
 
+@app.route("/visual-search", methods=["POST"])
+def visual_search_frontend():
+    """Visual search endpoint for frontend (matches expected endpoint name)"""
+    if model is None:
+        return jsonify({"error": "Model not loaded"}), 503
+    
+    if not product_embeddings:
+        return jsonify({"error": "No product data available"}), 503
+    
+    try:
+        # Check if image is provided
+        if 'image' not in request.files:
+            return jsonify({"error": "No image provided"}), 400
+        
+        image_file = request.files['image']
+        if image_file.filename == '':
+            return jsonify({"error": "No image selected"}), 400
+        
+        # Get number of results
+        top_k = int(request.form.get('top_k', 5))
+        top_k = min(max(top_k, 1), 20)  # Limit between 1-20
+        
+        # Process image
+        image_bytes = image_file.read()
+        query_embedding = get_image_embedding(image_bytes)
+        
+        if query_embedding is None:
+            return jsonify({"error": "Failed to process image"}), 400
+        
+        # Find similar products
+        similar_products = find_similar_products(query_embedding, top_k)
+        
+        # Format response for frontend compatibility
+        results = []
+        for product_id, similarity in similar_products:
+            result = {
+                "productId": product_id,
+                "similarity": round(similarity, 4),
+                "visualScore": round(similarity, 4),  # Frontend expects this field
+                "colorScore": round(similarity * 0.8, 4)  # Derived from similarity for now
+            }
+            
+            # Add color info if available
+            if product_id in product_colors:
+                result["dominantColor"] = product_colors[product_id]
+                # Adjust color score based on color data availability
+                result["colorScore"] = round(similarity * 0.9, 4)
+            
+            results.append(result)
+        
+        return jsonify({
+            "results": results,
+            "query_processed": True,
+            "total_results": len(results)
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Visual search error: {e}")
+        return jsonify({"error": "Search failed"}), 500
+
 # Initialize on startup
 if __name__ == "__main__":
     logger.info("🚀 Starting Visual Search Service...")
