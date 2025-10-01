@@ -15,7 +15,7 @@ class ModelUtils:
         self.product_to_idx = product_to_idx
         self.idx_to_product = idx_to_product
         
-        # Filter DataFrame to only include users and products that exist in the model
+
         self.df = self._filter_data(df)
         self.user_item_matrix = self._create_user_item_matrix()
         self.popular_products = self._calculate_popular_products()
@@ -23,7 +23,6 @@ class ModelUtils:
     def _filter_data(self, df):
         """Filter DataFrame to only include users and products in the trained model"""
         try:
-            # Only keep users that exist in the model
             filtered_df = df[
                 (df['userId'].isin(self.user_to_idx.keys())) & 
                 (df['productId'].isin(self.product_to_idx.keys()))
@@ -34,7 +33,7 @@ class ModelUtils:
             
         except Exception as e:
             logger.error(f"Error filtering data: {e}")
-            return df.iloc[0:0]  # Return empty DataFrame
+            return df.iloc[0:0] 
     
     def _create_user_item_matrix(self):
         """Create the user-item interaction matrix"""
@@ -62,7 +61,6 @@ class ModelUtils:
         try:
             if self.df.empty:
                 logger.warning("No data available for popularity calculation")
-                # Return first few products as fallback
                 return list(self.product_to_idx.keys())[:n]
             
             product_popularity = (
@@ -75,7 +73,6 @@ class ModelUtils:
             
             product_popularity.columns = ['total_strength', 'interaction_count', 'avg_strength']
             
-            # Calculate popularity score (weighted combination)
             if len(product_popularity) > 0:
                 product_popularity['popularity_score'] = (
                     0.4 * product_popularity['total_strength'] / product_popularity['total_strength'].max() +
