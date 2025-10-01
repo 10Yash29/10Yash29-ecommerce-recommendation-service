@@ -8,11 +8,9 @@ import os
 def train_recommendation_model():
     try:
         print("Loading data from aggregated_interactions.csv...")
-        # Load the aggregated data
         df = pd.read_csv('aggregated_interactions.csv')
         print(f"Loaded {len(df)} interaction records")
         
-        # Create user-item matrix
         print("Creating user-item matrix...")
         user_item_matrix = df.pivot_table(
             index='userId', 
@@ -22,18 +20,15 @@ def train_recommendation_model():
         )
         
         print(f"Matrix shape: {user_item_matrix.shape}")
-        
-        # Apply SVD for dimensionality reduction
+
         print("Training SVD model...")
         svd = TruncatedSVD(n_components=min(50, min(user_item_matrix.shape) - 1), random_state=42)
         user_features = svd.fit_transform(user_item_matrix)
         
-        # Calculate item-item similarity matrix
         print("Calculating item similarities...")
         item_features = svd.components_.T
         item_similarity = cosine_similarity(item_features)
-        
-        # Save the model components
+
         model_data = {
             'svd': svd,
             'user_item_matrix': user_item_matrix,
