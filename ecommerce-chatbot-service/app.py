@@ -45,16 +45,14 @@ def initialize_components():
         return False
 
 app = Flask(__name__)
+
+# CORS configuration - allow all Vercel preview URLs and production
 CORS(app, resources={
     r"/*": {
-        "origins": [
-            "http://localhost:3000",
-            "http://localhost:3001",
-            "https://*.vercel.app",
-            os.getenv("FRONTEND_URL", "*")
-        ],
+        "origins": "*",  # Allow all origins for now, restrict in production
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": False
     }
 })
 
