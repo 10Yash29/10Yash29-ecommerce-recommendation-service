@@ -56,6 +56,10 @@ CORS(app, resources={
     }
 })
 
+# Initialize components at module level (important for Gunicorn)
+logger.info("Initializing chatbot components...")
+initialize_components()
+
 @lru_cache(maxsize=100)
 def get_cached_embedding(message: str):
     """Cache embeddings for frequently asked questions"""
