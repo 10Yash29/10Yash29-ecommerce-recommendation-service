@@ -8,7 +8,7 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# Load the trained model
+
 model_data = None
 
 def load_model():
@@ -55,22 +55,22 @@ def generate_recommendations(user_id, num_recommendations=5):
     user_item_matrix = model_data['user_item_matrix']
     item_similarity = model_data['item_similarity']
     
-    # Check if user exists in the matrix
+
     if user_id not in user_item_matrix.index:
-        # For new users, return popular items
+
         user_interactions = user_item_matrix.sum(axis=0)
         popular_items = user_interactions.nlargest(num_recommendations).index.tolist()
         return [{"productId": item, "score": float(user_interactions[item])} for item in popular_items]
     
-    # Get user's interaction vector
+  
     user_vector = user_item_matrix.loc[user_id]
     user_interacted_items = user_vector[user_vector > 0].index
     
-    # Calculate scores for all items
+
     scores = {}
     for item in user_item_matrix.columns:
         if item not in user_interacted_items:
-            # Calculate score based on similarity to interacted items
+          
             item_idx = list(user_item_matrix.columns).index(item)
             score = 0
             for interacted_item in user_interacted_items:
@@ -80,7 +80,7 @@ def generate_recommendations(user_id, num_recommendations=5):
                 score += similarity * interaction_strength
             scores[item] = score
     
-    # Sort and return top recommendations
+
     sorted_items = sorted(scores.items(), key=lambda x: x[1], reverse=True)
     recommendations = [
         {"productId": item, "score": float(score)} 

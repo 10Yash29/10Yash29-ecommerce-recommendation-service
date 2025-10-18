@@ -20,7 +20,6 @@ def main():
     """Main setup function"""
     print("🚀 Starting E-commerce Recommendation Service Setup")
     
-    # Check if required files exist
     required_files = ['config.py', 'model_utils.py', 'app.py', 'requirements.txt', '.env']
     for file in required_files:
         if not os.path.exists(file):
@@ -29,13 +28,11 @@ def main():
     
     print("✅ All required files found")
     
-    # Install requirements
     if not run_command("pip install -r requirements.txt", "Installing requirements"):
         return False
     
-    # Check if data file exists
     if os.path.exists('aggregated_interactions.csv'):
-        # Train model
+
         if not run_command("python train_model.py", "Training model"):
             return False
     else:

@@ -14,14 +14,14 @@ from flask_cors import CORS
 from sklearn.metrics.pairwise import cosine_similarity
 import logging
 
-# Configure logging
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app)
 
-# Global variables
+
 model = None
 transform = None
 product_embeddings = {}
@@ -45,7 +45,7 @@ def load_product_data():
     """Load product embeddings and colors"""
     global product_embeddings, product_colors
     try:
-        # Try to load from current directory first
+        
         data_file = "product_data.pkl"
         if not os.path.exists(data_file):
             logger.warning(f"⚠️ {data_file} not found in current directory")
@@ -82,7 +82,7 @@ def find_similar_products(query_embedding, top_k=5):
         return []
     
     try:
-        # Calculate similarities
+      
         similarities = []
         for product_id, embedding in product_embeddings.items():
             similarity = cosine_similarity(
@@ -90,8 +90,7 @@ def find_similar_products(query_embedding, top_k=5):
                 embedding.reshape(1, -1)
             )[0][0]
             similarities.append((product_id, float(similarity)))
-        
-        # Sort by similarity and return top_k
+     
         similarities.sort(key=lambda x: x[1], reverse=True)
         return similarities[:top_k]
         
@@ -132,7 +131,7 @@ def visual_search():
         return jsonify({"error": "No product data available"}), 503
     
     try:
-        # Check if image is provided
+
         if 'image' not in request.files:
             return jsonify({"error": "No image provided"}), 400
         
@@ -140,21 +139,18 @@ def visual_search():
         if image_file.filename == '':
             return jsonify({"error": "No image selected"}), 400
         
-        # Get number of results
+
         top_k = int(request.form.get('top_k', 5))
-        top_k = min(max(top_k, 1), 20)  # Limit between 1-20
+        top_k = min(max(top_k, 1), 20)
         
-        # Process image
         image_bytes = image_file.read()
         query_embedding = get_image_embedding(image_bytes)
         
         if query_embedding is None:
             return jsonify({"error": "Failed to process image"}), 400
         
-        # Find similar products
+
         similar_products = find_similar_products(query_embedding, top_k)
-        
-        # Format response
         results = []
         for product_id, similarity in similar_products:
             result = {
@@ -162,7 +158,6 @@ def visual_search():
                 "similarity": round(similarity, 4)
             }
             
-            # Add color info if available
             if product_id in product_colors:
                 result["dominantColor"] = product_colors[product_id]
             
@@ -191,21 +186,19 @@ def visual_search_url():
         
         image_url = data['image_url']
         top_k = min(max(data.get('top_k', 5), 1), 20)
-        
-        # Download image
+
         response = requests.get(image_url, timeout=10)
         response.raise_for_status()
         
-        # Process image
         query_embedding = get_image_embedding(response.content)
         
         if query_embedding is None:
             return jsonify({"error": "Failed to process image"}), 400
         
-        # Find similar products
+
         similar_products = find_similar_products(query_embedding, top_k)
         
-        # Format response
+ 
         results = []
         for product_id, similarity in similar_products:
             result = {
@@ -228,14 +221,14 @@ def visual_search_url():
         logger.error(f"URL search error: {e}")
         return jsonify({"error": "Search failed"}), 500
 
-# Initialize on startup
+
 if __name__ == "__main__":
     logger.info("🚀 Starting Visual Search Service...")
     
-    # Load model
+
     model_loaded = load_visual_model()
     
-    # Load product data
+
     data_loaded = load_product_data()
     
     if not model_loaded:
@@ -244,6 +237,6 @@ if __name__ == "__main__":
     if not data_loaded:
         logger.warning("⚠️ No product data loaded - search will not work")
     
-    # Start Flask app
-    port = int(os.environ.get("PORT", 7860))  # HF Spaces uses port 7860
+
+    port = int(os.environ.get("PORT", 7860))  
     app.run(host="0.0.0.0", port=port, debug=False)

@@ -13,14 +13,12 @@ from torchvision import models
 from torchvision.models import ResNet50_Weights
 from colorthief import ColorThief
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Load environment
+
 load_dotenv()
 DATABASE_URL = os.environ.get("DATABASE_URL")
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL not set in environment")
 print(f"DATABASE_URL = {DATABASE_URL}")
-# ──────────────────────────────────────────────────────────────────────────────
 
 def fetch_product_images():
     """Return dict of {product_id: [image_url, …]}"""
@@ -103,7 +101,7 @@ if __name__ == "__main__":
         pickle.dump(pd, f)
     print("✅ Saved embeddings and colors to product_data.pkl")
     
-    # Verify file was written
+
     import os
     size = os.path.getsize("product_data.pkl")
     print(f"📁 File size: {size} bytes")
